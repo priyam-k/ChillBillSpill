@@ -111,7 +111,7 @@ const BriefingCard = ({ item, idx, onWatch, onComment, onSource }) => {
 const UpcomingCard = ({ item, onComment }) => {
   const tilt = (Math.random() - 0.5) * 1.4;
   return (
-    <div className="card relative" style={{ padding: "22px 24px", transform: `rotate(${tilt}deg)` }}>
+    <div className="card relative" style={{ padding: "22px 24px", transform: `rotate(${tilt}deg)`, color: "var(--ink)", background: "white" }}>
       {item.hot && (
         <div style={{ position: "absolute", top: -16, right: -10, transform: "rotate(8deg)", zIndex: 2 }}>
           <Sticker kind="tag" color="var(--magenta)" textColor="white" size="auto">HOT TICKET ★</Sticker>
