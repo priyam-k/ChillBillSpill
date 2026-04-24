@@ -60,11 +60,13 @@ const App = () => {
   // When both the loading animation finishes AND API data is ready, go to briefing
   useEffect(() => {
     if (animDone && pendingData !== null) {
-      // Merge: use real briefing if we got cards, otherwise keep mock cards
+      // Merge: use real briefing cards if we got them, otherwise keep mock
+      // Always use mock upcoming — scraper data is unreliable for this section
       const merged = { ...window.CBS_DATA, ...pendingData };
       if (!pendingData.briefing || pendingData.briefing.length === 0) {
         merged.briefing = window.CBS_DATA.briefing;
       }
+      merged.upcoming = window.CBS_DATA.upcoming;
       Object.assign(window.CBS_DATA, merged);
       setUser(merged.user || window.CBS_DATA.user);
       setPendingData(null);
