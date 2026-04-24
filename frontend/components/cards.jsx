@@ -257,17 +257,29 @@ const WatchModal = ({ item, onClose }) => {
         <div style={{ aspectRatio: "16/9", background: "var(--ink)", position: "relative", borderBottom: "2.5px solid var(--ink)" }}>
           <div className="bg-checker" style={{ position: "absolute", inset: 0, opacity: .15 }} />
           <div style={{ position: "absolute", inset: 0, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", color: "white", textAlign: "center", padding: 24 }}>
-            <div className="pulse-glow" style={{ fontSize: 92 }}>▶</div>
+            <a
+              href={item.videoUrl && item.videoUrl !== "#" ? item.videoUrl : (item.videoWebsite || "https://www.collegeparkmd.gov/councilmeetings")}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="pulse-glow"
+              style={{ fontSize: 92, color: "white", textDecoration: "none" }}
+            >▶</a>
             <div style={{ fontFamily: "var(--font-bungee)", fontSize: 26, marginTop: 12 }}>{item.headline}</div>
             <div className="mono mt-2" style={{ fontSize: 13, color: "var(--cyan)" }}>
               ⏱ jump → {item.videoTimestamp} of meeting recording
             </div>
-            <div className="mt-4 px-4 py-2 rounded-full mono" style={{ background: "var(--magenta)", fontSize: 11 }}>
-              Swagit player · College Park council livestream
-            </div>
+            <a
+              href={item.videoUrl && item.videoUrl !== "#" ? item.videoUrl : (item.videoWebsite || "https://www.collegeparkmd.gov/councilmeetings")}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="mt-4 px-4 py-2 rounded-full mono"
+              style={{ background: "var(--magenta)", fontSize: 11, color: "white", textDecoration: "none", display: "inline-block" }}
+            >
+              {item.jurisdiction === "County" ? "Granicus player · PG County" : item.jurisdiction === "Schools" ? "BoardDocs · PGCPS" : "Swagit player · College Park"} ↗
+            </a>
           </div>
 
-          {/* fake scrubber */}
+          {/* scrubber */}
           <div style={{ position: "absolute", left: 16, right: 16, bottom: 16, background: "rgba(255,255,255,.15)", height: 8, borderRadius: 999, overflow: "hidden" }}>
             <div style={{ width: "32%", height: "100%", background: "var(--magenta)" }} />
             <div style={{ position: "absolute", left: "32%", top: -6, width: 20, height: 20, background: "var(--lime)", border: "2px solid var(--ink)", borderRadius: "50%" }} />
@@ -283,7 +295,8 @@ const WatchModal = ({ item, onClose }) => {
             </div>
           </div>
           <div className="mono" style={{ fontSize: 11, opacity: .6 }}>
-            ★ source: collegeparkmd.gov/councilmeetings · timestamp pulled from chapter manifest
+            ★ opens real government video archive in new tab ·{" "}
+            {item.jurisdiction === "County" ? "princegeorgescountymd.granicus.com" : item.jurisdiction === "Schools" ? "go.boarddocs.com/mabe/pgcps" : "collegeparkmd.gov/councilmeetings"}
           </div>
         </div>
       </div>
@@ -348,9 +361,20 @@ const SourceModal = ({ item, onClose }) => {
           </div>
 
           <div className="flex gap-3 flex-wrap">
-            <a className="btn btn-chrome" href="#" onClick={e => e.preventDefault()}>📥 Download agenda PDF</a>
-            <a className="btn" href="#" onClick={e => e.preventDefault()}>📥 Download minutes PDF</a>
-            <a className="btn btn-secondary" href="#" onClick={e => e.preventDefault()}>🔗 Open on collegeparkmd.gov</a>
+            {item.sourceUrl && item.sourceUrl !== "#" && (
+              <a className="btn btn-chrome" href={item.sourceUrl} target="_blank" rel="noopener noreferrer">📥 Open agenda PDF ↗</a>
+            )}
+            {item.minutesUrl && item.minutesUrl !== "#" && (
+              <a className="btn" href={item.minutesUrl} target="_blank" rel="noopener noreferrer">📥 Open minutes PDF ↗</a>
+            )}
+            <a
+              className="btn btn-secondary"
+              href={item.sourceWebsite || item.sourceUrl || "https://www.collegeparkmd.gov/agendacenter"}
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              🔗 {item.jurisdiction === "County" ? "legistar.com ↗" : item.jurisdiction === "Schools" ? "boarddocs.com ↗" : "collegeparkmd.gov ↗"}
+            </a>
           </div>
         </div>
       </div>
