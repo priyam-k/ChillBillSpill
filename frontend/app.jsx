@@ -60,8 +60,13 @@ const App = () => {
   // When both the loading animation finishes AND API data is ready, go to briefing
   useEffect(() => {
     if (animDone && pendingData !== null) {
-      Object.assign(window.CBS_DATA, pendingData);
-      setUser(pendingData.user || window.CBS_DATA.user);
+      // Merge: use real briefing if we got cards, otherwise keep mock cards
+      const merged = { ...window.CBS_DATA, ...pendingData };
+      if (!pendingData.briefing || pendingData.briefing.length === 0) {
+        merged.briefing = window.CBS_DATA.briefing;
+      }
+      Object.assign(window.CBS_DATA, merged);
+      setUser(merged.user || window.CBS_DATA.user);
       setPendingData(null);
       setAnimDone(false);
       setScreen("briefing");
