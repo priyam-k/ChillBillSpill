@@ -54,48 +54,79 @@ async def fetch_recent_meetings(days: int = 21) -> list[dict]:
 
 
 def _parse_agenda_center(html: str, days: int) -> list[dict]:
-    """Parse CivicEngage AgendaCenter HTML for recent meetings."""
+    """
+    Parse CivicEngage AgendaCenter HTML for recent Mayor & Council meetings.
+    Prioritizes 'Mayor and Council' meetings; falls back to any meeting.
+    """
     tree = HTMLParser(html)
     cutoff = datetime.now(timezone.utc) - timedelta(days=days)
-    meetings = []
 
-    # CivicEngage lists meetings in a table or repeating divs.
-    # Look for links containing "ViewFile/Agenda" or "ViewFile/Minutes"
+    # Build a map: href → link text, using the parent row context
+    # CivicEngage renders meeting name as a link immediately before the Agenda/Minutes links
+    href_to_name: dict[str, str] = {}
+    last_meeting_name = ""
     for node in tree.css("a[href]"):
         href = node.attributes.get("href") or ""
         text = node.text(strip=True)
+        if not href:
+            continue
+        # If this looks like a meeting name link (has a date-coded href or meeting-type text)
+        if re.search(r"/AgendaCenter/ViewFile/(Agenda|Minutes)/", href, re.I):
+            href_to_name[href] = last_meeting_name
+        elif any(k in text for k in ["Mayor", "Council", "Commission", "Board", "Authority", "Committee"]):
+            last_meeting_name = text
 
-        # Match agenda or minutes PDF links
+    # Collect all Agenda/Minutes links with their meeting name
+    entries = []
+    for node in tree.css("a[href]"):
+        href = node.attributes.get("href") or ""
+        link_text = node.text(strip=True)
         if not re.search(r"/AgendaCenter/ViewFile/(Agenda|Minutes)/", href, re.I):
             continue
-
-        # Try to extract a date from nearby text or the href itself
-        date = _extract_date_from_href(href) or _extract_date_from_text(text)
-        if not date:
+        date = _extract_date_from_href(href)
+        if not date or date < cutoff:
             continue
-        if date < cutoff:
-            continue
-
-        meeting_type = _guess_meeting_type(text + href)
-        full_url = href if href.startswith("http") else BASE + href
+        name = href_to_name.get(href, link_text)
         file_type = "minutes" if "minutes" in href.lower() else "agenda"
+        full_url = href if href.startswith("http") else BASE + href
+        entries.append((date, name, file_type, full_url))
 
-        # Group by date
-        existing = next((m for m in meetings if m["date"] == date.date().isoformat()), None)
-        if existing:
-            existing[f"{file_type}Url"] = full_url
-        else:
-            meetings.append({
+    # Prioritize Mayor & Council meetings, then everything else
+    def priority(entry):
+        name = entry[1].lower()
+        if "mayor" in name and "council" in name:
+            return 0
+        if "mayor" in name or "council" in name:
+            return 1
+        return 2
+
+    entries.sort(key=lambda e: (priority(e), e[0]), reverse=False)
+    # Now build meeting dicts, deduping by (date, name)
+    meetings: dict[str, dict] = {}
+    for date, name, file_type, full_url in entries:
+        key = f"{date.date().isoformat()}|{name}"
+        if key not in meetings:
+            meetings[key] = {
                 "date": date.date().isoformat(),
-                "meetingType": meeting_type,
+                "meetingType": _guess_meeting_type(name),
+                "meetingName": name,
                 "jurisdiction": "City",
                 "jurisdictionFull": "City of College Park",
-                f"{file_type}Url": full_url,
                 "videoPageUrl": None,
-            })
+            }
+        meetings[key][f"{file_type}Url"] = full_url
 
-    meetings.sort(key=lambda m: m["date"], reverse=True)
-    return meetings[:4]  # last 2–4 meetings
+    # Sort by date desc, mayor/council first
+    result = sorted(
+        meetings.values(),
+        key=lambda m: (0 if "mayor" in m["meetingName"].lower() and "council" in m["meetingName"].lower() else 1, m["date"]),
+        reverse=False,
+    )
+    # Return most recent 4, mayor/council first
+    result.sort(key=lambda m: m["date"], reverse=True)
+    mayor_council = [m for m in result if "mayor" in m["meetingName"].lower()]
+    others = [m for m in result if "mayor" not in m["meetingName"].lower()]
+    return (mayor_council + others)[:4]
 
 
 def _extract_date_from_href(href: str) -> Optional[datetime]:
