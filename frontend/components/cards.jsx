@@ -132,9 +132,16 @@ const UpcomingCard = ({ item, onComment }) => {
           <div style={{ opacity: .6 }}>COMMENT BY</div>
           <div style={{ fontWeight: 700, color: "var(--magenta)" }}>⏰ {item.commentDeadline}</div>
         </div>
-        <button className="btn btn-primary" onClick={() => onComment(item, "upcoming")}>
-          💬 Submit a comment
-        </button>
+        <div className="flex gap-2 flex-wrap">
+          {item.agendaUrl && (
+            <a className="btn btn-chrome" href={item.agendaUrl} target="_blank" rel="noopener noreferrer" style={{ padding: "12px 16px", fontSize: 14 }}>
+              📄 View agenda ↗
+            </a>
+          )}
+          <button className="btn btn-primary" onClick={() => onComment(item, "upcoming")}>
+            💬 Submit a comment
+          </button>
+        </div>
       </div>
     </div>
   );
