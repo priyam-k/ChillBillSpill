@@ -284,3 +284,171 @@ window.CBS_DATA = {
     "4321 Hartwick Rd"
   ]
 };
+
+// Stash base data so address variants can reset cleanly
+window._CBS_BASE_BRIEFING = window.CBS_DATA.briefing.slice();
+window._CBS_BASE_USER = Object.assign({}, window.CBS_DATA.user);
+
+// ── Address-specific overrides ──────────────────────────────────────────────
+// Keyed by lowercase keyword. Applied by CBS_pickVariant() in app.jsx.
+window.CBS_VARIANTS = {
+
+  // 7401 Baltimore Ave — City Hall area, District 4
+  "baltimore": {
+    user: { address: "7401 Baltimore Ave", city: "College Park, MD 20740", cityDistrict: 4, countyDistrict: 1, schoolDistrict: 1 },
+    extraBriefing: [
+      {
+        id: "cp-2026-downtown-parking",
+        jurisdiction: "City", jurisdictionFull: "City of College Park",
+        tags: ["AFFECTS YOUR BLOCK", "BUDGET"], category: "budget", categoryEmoji: "🅿️",
+        meetingDate: "Apr 22, 2026", meetingType: "Regular Business",
+        headline: "Downtown parking garage rate hike approved 7–1",
+        summary: "Council approved raising Yale Ave garage rates from $1 to $2/hr peak, projecting $180K in annual new revenue toward downtown streetscape improvements.",
+        vote: { result: "passed", yes: 7, no: 1, no_voters: ["Denise Mitchell"] },
+        dollarAmount: "$180,000", affectsScore: 9.4,
+        affectsReason: "Yale Ave garage is your closest parking — rates double starting June 1.",
+        videoTimestamp: "1:08:22", videoUrl: "https://www.collegeparkmd.gov/councilmeetings",
+        videoWebsite: "https://www.collegeparkmd.gov/councilmeetings",
+        sourceUrl: "https://www.collegeparkmd.gov/AgendaCenter/ViewFile/Agenda/_04222026-2248",
+        sourceWebsite: "https://www.collegeparkmd.gov/agendacenter",
+        sourcePage: 18, isYours: true, heat: "🔥🔥🔥"
+      },
+      {
+        id: "cp-2026-city-hall-annex",
+        jurisdiction: "City", jurisdictionFull: "City of College Park",
+        tags: ["AFFECTS YOUR BLOCK"], category: "budget", categoryEmoji: "🏛️",
+        meetingDate: "Apr 7, 2026", meetingType: "Worksession",
+        headline: "City Hall annex lease — $2.1M over 5 years authorized",
+        summary: "Council authorized a 5-year lease for 4302 Baltimore Ave as an annex for permits and public works offices, consolidating services currently spread across 3 buildings.",
+        vote: { result: "passed", yes: 8, no: 0, no_voters: [] },
+        dollarAmount: "$2,100,000", affectsScore: 7.8,
+        affectsReason: "New annex is 1 block from your address — expect increased foot traffic and parking demand.",
+        videoTimestamp: "2:14:05", videoUrl: "https://www.collegeparkmd.gov/councilmeetings",
+        videoWebsite: "https://www.collegeparkmd.gov/councilmeetings",
+        sourceUrl: "https://www.collegeparkmd.gov/AgendaCenter/ViewFile/Agenda/_04072026-2235",
+        sourceWebsite: "https://www.collegeparkmd.gov/agendacenter",
+        sourcePage: 12, isYours: true, heat: "🔥🔥"
+      }
+    ]
+  },
+
+  // 7505 Yale Ave — District 4, near downtown
+  "yale": {
+    user: { address: "7505 Yale Ave", city: "College Park, MD 20740", cityDistrict: 4, countyDistrict: 1, schoolDistrict: 1 },
+    extraBriefing: [
+      {
+        id: "cp-2026-yale-streetscape",
+        jurisdiction: "City", jurisdictionFull: "City of College Park",
+        tags: ["AFFECTS YOUR BLOCK", "TRANSPO"], category: "transportation", categoryEmoji: "🚶",
+        meetingDate: "Apr 22, 2026", meetingType: "Regular Business",
+        headline: "Yale Ave streetscape redesign — $890K contract awarded",
+        summary: "Council awarded a contract to Greenman-Pedersen Inc for Yale Ave streetscape improvements including new lighting, benches, and ADA-compliant curb cuts between Guilford and Knox Rd.",
+        vote: { result: "passed", yes: 8, no: 0, no_voters: [] },
+        dollarAmount: "$890,000", affectsScore: 9.6,
+        affectsReason: "Your block of Yale Ave is in the project scope — expect construction disruption starting July.",
+        videoTimestamp: "1:41:30", videoUrl: "https://www.collegeparkmd.gov/councilmeetings",
+        videoWebsite: "https://www.collegeparkmd.gov/councilmeetings",
+        sourceUrl: "https://www.collegeparkmd.gov/AgendaCenter/ViewFile/Agenda/_04222026-2248",
+        sourceWebsite: "https://www.collegeparkmd.gov/agendacenter",
+        sourcePage: 21, isYours: true, heat: "🔥🔥🔥"
+      }
+    ]
+  },
+
+  // 9200 Rhode Island Ave — District 1, north CP
+  "rhode island": {
+    user: { address: "9200 Rhode Island Ave", city: "College Park, MD 20740", cityDistrict: 1, countyDistrict: 1, schoolDistrict: 1 },
+    extraBriefing: [
+      {
+        id: "cp-2026-ri-ave-sidewalk",
+        jurisdiction: "City", jurisdictionFull: "City of College Park",
+        tags: ["AFFECTS YOUR BLOCK", "TRANSPO"], category: "transportation", categoryEmoji: "🚲",
+        meetingDate: "Apr 22, 2026", meetingType: "Regular Business",
+        headline: "$2.4M Hollywood corridor sidewalk rebuild approved",
+        summary: "Council approved a contract with KCI Technologies to rebuild ADA ramps and reset 1.8 miles of sidewalk along Rhode Island Ave between Edgewood and Cherokee. Work begins June 9.",
+        vote: { result: "passed", yes: 8, no: 0, no_voters: [] },
+        dollarAmount: "$2,412,000", affectsScore: 9.7,
+        affectsReason: "Construction runs directly in front of your block on Rhode Island Ave — expect June–August disruption.",
+        videoTimestamp: "0:47:22", videoUrl: "https://www.collegeparkmd.gov/councilmeetings",
+        videoWebsite: "https://www.collegeparkmd.gov/councilmeetings",
+        sourceUrl: "https://www.collegeparkmd.gov/AgendaCenter/ViewFile/Agenda/_04222026-2248",
+        sourceWebsite: "https://www.collegeparkmd.gov/agendacenter",
+        sourcePage: 6, isYours: true, heat: "🔥🔥🔥"
+      },
+      {
+        id: "pgcps-2026-cp-hs-rezoning",
+        jurisdiction: "Schools", jurisdictionFull: "PGCPS Board of Education",
+        tags: ["SCHOOLS", "AFFECTS YOUR BLOCK"], category: "schools", categoryEmoji: "🎒",
+        meetingDate: "Apr 10, 2026", meetingType: "Budget Work Session",
+        headline: "Parkdale HS capacity plan — 200-seat addition approved",
+        summary: "Board approved a $14.8M design-build contract for a 200-seat addition at Parkdale High School, addressing enrollment that has exceeded capacity for 3 consecutive years.",
+        vote: { result: "passed", yes: 11, no: 2, no_voters: ["Kenneth Harris II", "Edward Burroughs"] },
+        dollarAmount: "$14,800,000", affectsScore: 7.9,
+        affectsReason: "Parkdale High is the zoned school for your address — more seats means smaller classes.",
+        videoTimestamp: "1:22:18", videoUrl: "https://go.boarddocs.com/mabe/pgcps/Board.nsf/Public",
+        videoWebsite: "https://go.boarddocs.com/mabe/pgcps/Board.nsf/Public",
+        sourceUrl: "https://go.boarddocs.com/mabe/pgcps/Board.nsf/Public",
+        sourceWebsite: "https://go.boarddocs.com/mabe/pgcps/Board.nsf/Public",
+        sourcePage: 9, isYours: true, heat: "🔥🔥"
+      }
+    ]
+  },
+
+  // 5010 Berwyn Rd / 4321 Hartwick Rd — District 2
+  "berwyn": {
+    user: { address: "5010 Berwyn Rd", city: "College Park, MD 20740", cityDistrict: 2, countyDistrict: 1, schoolDistrict: 3 },
+    extraBriefing: [
+      {
+        id: "cp-2026-berwyn-trail",
+        jurisdiction: "City", jurisdictionFull: "City of College Park",
+        tags: ["AFFECTS YOUR BLOCK", "TRANSPO"], category: "transportation", categoryEmoji: "🚲",
+        meetingDate: "Apr 15, 2026", meetingType: "Worksession",
+        headline: "Trolley Trail solar lighting — Berwyn segment funded",
+        summary: "Council directed staff to issue an RFP for solar bollard lighting on the Trolley Trail from Lakeland Rd to Berwyn Heights. District 2 reps Esters and Whitney co-sponsored after resident petitions.",
+        vote: { result: "direction", yes: null, no: null, no_voters: [] },
+        dollarAmount: null, affectsScore: 9.3,
+        affectsReason: "The trail runs 2 blocks from your address — lighting covers your exact commute stretch.",
+        videoTimestamp: "1:55:40", videoUrl: "https://www.collegeparkmd.gov/councilmeetings",
+        videoWebsite: "https://www.collegeparkmd.gov/councilmeetings",
+        sourceUrl: "https://www.collegeparkmd.gov/AgendaCenter/ViewFile/Agenda/_04142026-2246",
+        sourceWebsite: "https://www.collegeparkmd.gov/agendacenter",
+        sourcePage: 9, isYours: true, heat: "🔥🔥🔥"
+      }
+    ]
+  },
+
+  "hartwick": {
+    user: { address: "4321 Hartwick Rd", city: "College Park, MD 20740", cityDistrict: 2, countyDistrict: 1, schoolDistrict: 3 },
+    extraBriefing: [
+      {
+        id: "cp-2026-hartwick-parking",
+        jurisdiction: "City", jurisdictionFull: "City of College Park",
+        tags: ["AFFECTS YOUR BLOCK"], category: "zoning", categoryEmoji: "🏘️",
+        meetingDate: "Apr 7, 2026", meetingType: "Regular Business",
+        headline: "Hartwick Rd permit parking zone — petition approved",
+        summary: "Council approved creation of a Residential Permit Parking zone on Hartwick Rd between Knox and Guilford in response to overflow parking from the Rt 1 corridor. Permits free for residents, $30/yr for guests.",
+        vote: { result: "passed", yes: 7, no: 1, no_voters: ["Jacob Hernandez"] },
+        dollarAmount: null, affectsScore: 9.5,
+        affectsReason: "Your block is in the new permit zone — you'll need a sticker starting July 1.",
+        videoTimestamp: "0:38:50", videoUrl: "https://www.collegeparkmd.gov/councilmeetings",
+        videoWebsite: "https://www.collegeparkmd.gov/councilmeetings",
+        sourceUrl: "https://www.collegeparkmd.gov/AgendaCenter/ViewFile/Agenda/_04072026-2235",
+        sourceWebsite: "https://www.collegeparkmd.gov/agendacenter",
+        sourcePage: 7, isYours: true, heat: "🔥🔥🔥"
+      }
+    ]
+  }
+};
+
+// Call this with the submitted address to get a merged CBS_DATA
+window.CBS_pickVariant = function(address) {
+  const low = address.toLowerCase();
+  const key = Object.keys(window.CBS_VARIANTS).find(k => low.includes(k));
+  if (!key) return;
+  const v = window.CBS_VARIANTS[key];
+  if (v.user) Object.assign(window.CBS_DATA.user, v.user);
+  if (v.extraBriefing) {
+    // Prepend address-specific items, keep existing ones, cap at 7
+    window.CBS_DATA.briefing = [...v.extraBriefing, ...window.CBS_DATA.briefing].slice(0, 7);
+  }
+};

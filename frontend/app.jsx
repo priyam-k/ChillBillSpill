@@ -93,6 +93,10 @@ const App = () => {
   const handleSubmitAddress = (addr) => {
     const inCP = /college park|20740|20741|20742|knox|baltimore ave|yale|hartwick|berwyn|rhode island/i.test(addr);
     pendingAddr.current = addr;
+    // Reset to base mock data, then apply address-specific variant
+    window.CBS_DATA.briefing = window._CBS_BASE_BRIEFING.slice();
+    window.CBS_DATA.user = { ...window._CBS_BASE_USER };
+    if (window.CBS_pickVariant) window.CBS_pickVariant(addr);
     setUser({ ...window.CBS_DATA.user, address: addr });
     if (!inCP) {
       setScreen("oos");
