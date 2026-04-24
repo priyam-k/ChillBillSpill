@@ -57,37 +57,18 @@ const App = () => {
     sheet.textContent = tweaks.marqueeOn ? "" : ".marquee { display: none !important; }";
   }, [tweaks.marqueeOn]);
 
-  // When both the loading animation finishes AND API data is ready, go to briefing
+  // When animation finishes, go straight to briefing — variant already applied
   useEffect(() => {
     if (animDone && pendingData !== null) {
-      // Merge: use real briefing cards if we got them, otherwise keep mock
-      // Always use mock upcoming — scraper data is unreliable for this section
-      const merged = { ...window.CBS_DATA, ...pendingData };
-      if (!pendingData.briefing || pendingData.briefing.length === 0) {
-        merged.briefing = window.CBS_DATA.briefing;
-      }
-      merged.upcoming = window.CBS_DATA.upcoming;
-      Object.assign(window.CBS_DATA, merged);
-      setUser(merged.user || window.CBS_DATA.user);
       setPendingData(null);
       setAnimDone(false);
       setScreen("briefing");
     }
   }, [animDone, pendingData]);
 
-  const fetchBriefing = async (addr) => {
-    try {
-      const resp = await fetch(`/api/briefing?address=${encodeURIComponent(addr)}`);
-      if (resp.ok) {
-        const data = await resp.json();
-        setPendingData(data);
-      } else {
-        setPendingData(window.CBS_DATA);
-      }
-    } catch (e) {
-      // Backend not available — use mock data so demo still works
-      setPendingData(window.CBS_DATA);
-    }
+  const fetchBriefing = async (_addr) => {
+    // Variant already applied in handleSubmitAddress; just signal ready
+    setPendingData({});
   };
 
   const handleSubmitAddress = (addr) => {
