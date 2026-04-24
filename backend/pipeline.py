@@ -58,6 +58,14 @@ def _format_next_meeting() -> dict:
     }
 
 
+def _normalize_address(address: str) -> str:
+    """Ensure address includes College Park, MD so geocoder doesn't guess wrong city."""
+    low = address.lower()
+    if any(x in low for x in ["college park", "20740", "20741", "20742", "maryland", ", md"]):
+        return address
+    return f"{address}, College Park, MD 20740"
+
+
 async def run_briefing(address: str) -> dict:
     """
     Full pipeline for a given address.
@@ -68,8 +76,8 @@ async def run_briefing(address: str) -> dict:
     if cached:
         return cached
 
-    # 1. Geocode
-    geo = await gc.geocode(address)
+    # 1. Geocode — normalize first so we don't geocode to Georgia
+    geo = await gc.geocode(_normalize_address(address))
     if not geo:
         return _oos_response(address, "Could not geocode address")
 
@@ -124,7 +132,8 @@ async def run_briefing(address: str) -> dict:
     for raw_item, summary in zip(items_to_process, summaries):
         if isinstance(summary, Exception) or summary is None:
             continue
-        if not summary.get("is_relevant_to_college_park", True):
+        # Always include City items; filter others only if explicitly flagged irrelevant
+        if raw_item.get("jurisdiction") != "City" and not summary.get("is_relevant_to_college_park", True):
             continue
         card = llm.item_to_card(
             raw_item,

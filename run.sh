@@ -4,9 +4,14 @@ set -e
 
 ROOT="$(cd "$(dirname "$0")" && pwd)"
 
+# Load .env if present
+if [ -f "$ROOT/.env" ]; then
+  export $(grep -v '^#' "$ROOT/.env" | xargs)
+fi
+
 if [ -z "$ANTHROPIC_API_KEY" ]; then
   echo "⚠️  ANTHROPIC_API_KEY not set — LLM summarization will fail."
-  echo "   export ANTHROPIC_API_KEY=sk-ant-... and re-run."
+  echo "   Add it to .env or export ANTHROPIC_API_KEY=sk-ant-..."
   echo ""
 fi
 
