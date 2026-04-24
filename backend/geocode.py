@@ -45,6 +45,9 @@ async def _nominatim(address: str) -> dict | None:
         "format": "json",
         "limit": 1,
         "countrycodes": "us",
+        # Bias to College Park / PG County bounding box
+        "viewbox": "-77.2,38.8,-76.7,39.2",
+        "bounded": 0,
     }
     headers = {"User-Agent": "ChillBillSpill/1.0 (hackathon demo)"}
     async with httpx.AsyncClient(timeout=10) as c:
