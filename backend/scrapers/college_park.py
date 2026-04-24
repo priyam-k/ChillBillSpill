@@ -62,7 +62,7 @@ def _parse_agenda_center(html: str, days: int) -> list[dict]:
     # CivicEngage lists meetings in a table or repeating divs.
     # Look for links containing "ViewFile/Agenda" or "ViewFile/Minutes"
     for node in tree.css("a[href]"):
-        href = node.attributes.get("href", "")
+        href = node.attributes.get("href") or ""
         text = node.text(strip=True)
 
         # Match agenda or minutes PDF links
@@ -248,15 +248,47 @@ async def get_agenda_items(days: int = 21) -> list[dict]:
 
 
 def _split_agenda_items(text: str) -> list[str]:
-    """Split agenda text into individual items by number patterns."""
+    """
+    Split College Park agenda into substantive items.
+    Looks for CivicEngage item codes like 26-G-38, 26-O-03, etc.
+    """
     if not text:
         return []
 
-    # Match numbered agenda items: "1.", "I.", "Item 1", etc.
-    pattern = r"(?:^|\n)\s*(?:Item\s+)?(?:\d+|[IVX]+)\s*[.):]\s+"
+    items = []
+
+    # Primary: find items by CivicEngage code pattern (YY-LETTER-NUM)
+    # e.g. "26-G-38 Approval of...", "26-O-03 Introduction of..."
+    civic_pattern = re.compile(
+        r"(\d{2}-[A-Z]+-\d+)\s+(.+?)(?=\n\d{2}-[A-Z]+-\d+|\Z)",
+        re.S
+    )
+    for m in civic_pattern.finditer(text):
+        item_id = m.group(1)
+        body = m.group(2).strip()
+        # Clean up body — remove trailing page numbers and footnotes
+        body = re.sub(r"\s+\d{3}\s*$", "", body, flags=re.M).strip()
+        body = re.sub(r"\n(Motion By:|2nd:|Vote:|Yeas:|Nays:).*", "", body, flags=re.S).strip()
+        if len(body) > 30:
+            items.append(f"{item_id} {body}")
+
+    # If we got any civic-coded items, return those
+    if items:
+        return items[:15]
+
+    # Fallback: split by ACTION ITEMS section headings
+    action_match = re.search(r"(?:ACTION ITEMS?|CONSENT AGENDA)[:\s]*\n(.+?)(?=\n\d{1,2}\.|$)", text, re.S | re.I)
+    if action_match:
+        section = action_match.group(1)
+        parts = re.split(r"(?:^|\n)\s*\d+\.", section, flags=re.M)
+        items = [p.strip() for p in parts if len(p.strip()) > 60][:12]
+        if items:
+            return items
+
+    # Last resort: numbered items
+    pattern = r"(?:^|\n)\s*(?:\d+|[IVX]+)\s*[.):]\s+"
     parts = re.split(pattern, text, flags=re.MULTILINE)
-    # Filter to non-trivial items
-    return [p.strip() for p in parts if len(p.strip()) > 60][:15]
+    return [p.strip() for p in parts if len(p.strip()) > 80][:12]
 
 
 def _find_minutes_for_item(item_text: str, minutes_text: str) -> str:
