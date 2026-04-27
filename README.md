@@ -4,6 +4,13 @@
 
 ChillBillSpill turns messy local government records into a 3-minute, address-based civic briefing — with receipts, vote results, timestamps, and one-click public comment.
 
+<img width="2940" height="1466" alt="image" src="https://github.com/user-attachments/assets/da14bbba-bdc1-4874-8360-bc158c3a6d8b" />
+
+### 
+
+<img width="2940" height="1464" alt="image" src="https://github.com/user-attachments/assets/4c32cdab-55bd-4f8f-a81c-236833d094ee" />
+
+
 ---
 
 ## What It Does
